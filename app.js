@@ -94,7 +94,7 @@ app.post(`/login/`, async (request, response) => {
 })
 
 // API -- 2
-app.get(`/states/`, async (request, response) => {
+app.get(`/states/`, authenticateToken, async (request, response) => {
   const {stateId} = request.params
   const {stateName, population} = request.body
   const getStatesQuery = `
@@ -107,7 +107,7 @@ app.get(`/states/`, async (request, response) => {
 })
 
 // API --3
-app.get(`/states/:stateId/`, async (request, response) => {
+app.get(`/states/:stateId/`, authenticateToken, async (request, response) => {
   const {stateId} = request.params
   const {stateName, population} = request.body
   const getsingleStateQuery = `
@@ -119,7 +119,7 @@ app.get(`/states/:stateId/`, async (request, response) => {
 
 // API -- 4
 
-app.post(`/districts/`, async (request, response) => {
+app.post(`/districts/`, authenticateToken, async (request, response) => {
   const {districName, stateId, cases, cured, active, deaths} = request.body
   const postDistricQuery = `
   INSERT INTO
@@ -132,33 +132,44 @@ app.post(`/districts/`, async (request, response) => {
 
 // API -- 5
 
-app.get(`/districts/:districtId/`, async (request, response) => {
-  const {districtId} = request.params
-  const {districName, stateId, cases, cured, active, deaths} = request.body
-  const getSingleDistrict = `
+app.get(
+  `/districts/:districtId/`,
+  authenticateToken,
+  async (request, response) => {
+    const {districtId} = request.params
+    const {districName, stateId, cases, cured, active, deaths} = request.body
+    const getSingleDistrict = `
   SELECT * FROM district WHERE district_id = '${districtId}';
   `
-  const singleDistrict = await db.get(getSingleDistrict)
-  response.send(convertDistrictObjectToResponseObject(singleDistrict))
-})
+    const singleDistrict = await db.get(getSingleDistrict)
+    response.send(convertDistrictObjectToResponseObject(singleDistrict))
+  },
+)
 
 // API -- 6
 
-app.delete(`/districts/:districtId/`, async (request, response) => {
-  const {districtId} = request.params
-  const deleteDistrictQuery = `
+app.delete(
+  `/districts/:districtId/`,
+  authenticateToken,
+  async (request, response) => {
+    const {districtId} = request.params
+    const deleteDistrictQuery = `
   DELETE FROM district WHERE district_id = ${districtId};
   `
-  await db.run(deleteDistrictQuery)
-  response.send('District Removed')
-})
+    await db.run(deleteDistrictQuery)
+    response.send('District Removed')
+  },
+)
 
 // API -- 7
 
-app.put(`/districts/:districtId/`, async (request, response) => {
-  const {districtId} = request.params
-  const {districName, stateId, cases, cured, active, deaths} = request.body
-  updateDistrictQuery = `
+app.put(
+  `/districts/:districtId/`,
+  authenticateToken,
+  async (request, response) => {
+    const {districtId} = request.params
+    const {districName, stateId, cases, cured, active, deaths} = request.body
+    updateDistrictQuery = `
   UPDATE district 
   SET
   district_name = '${districName}',
@@ -169,9 +180,10 @@ app.put(`/districts/:districtId/`, async (request, response) => {
   deaths = '${deaths}' 
   WHERE district_id = ${districtId};
   `
-  await db.run(updateDistrictQuery)
-  response.send('District Details Updated')
-})
+    await db.run(updateDistrictQuery)
+    response.send('District Details Updated')
+  },
+)
 
 // API -- 8
 
